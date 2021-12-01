@@ -1,15 +1,14 @@
-package day1
+package day01
 
 object SonarSweep2 {
 
   def main(args: Array[String]): Unit = {
     val values = readFile().to(LazyList)
 
-    val values1 = values.slice(0, values.size - 3)
-    val values2 = values.slice(1, values.size - 2)
-    val values3 = values.slice(2, values.size - 1)
-    val values4 = values.slice(3, values.size)
-    val slidingWindows1 = (values1, values2, values3).zipped
+    val values2 = values.drop(1)
+    val values3 = values.drop(2)
+    val values4 = values.drop(3)
+    val slidingWindows1 = (values, values2, values3).zipped
     val slidingWindows2 = (values2, values3, values4).zipped
     val increases = slidingWindows1.zip(slidingWindows2)
       .count { case ((a, b, c), (u, v, x)) => a + b + c < u + v + x }
