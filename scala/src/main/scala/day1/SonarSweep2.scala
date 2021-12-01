@@ -3,7 +3,7 @@ package day1
 object SonarSweep2 {
 
   def main(args: Array[String]): Unit = {
-    val values = readFile()
+    val values = readFile().to(LazyList)
 
     val values1 = values.slice(0, values.size - 3)
     val values2 = values.slice(1, values.size - 2)
