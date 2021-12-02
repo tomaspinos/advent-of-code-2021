@@ -1,9 +1,9 @@
 package day02
 
-import java.io.File
+import Common
 
 fun main() {
-    val instructions = readInput()
+    val instructions = Common.readInput("/day02/input.txt")
     val position = Dive2().dive(instructions)
     println(position)
     println(position.horizontal * position.depth)
@@ -29,10 +29,4 @@ class Dive2 {
     }
 
     data class Position(val horizontal: Int, val depth: Int, val aim: Int)
-}
-
-
-private fun readInput(): List<String> {
-    return File(Dive1::class.java.getResource("input.txt").path)
-        .readLines()
 }

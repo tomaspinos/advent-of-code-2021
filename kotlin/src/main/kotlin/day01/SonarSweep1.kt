@@ -1,16 +1,15 @@
 package day01
 
-import java.io.File
+import Common
 
 fun main() {
-    println(SonarSweep1().countIncreases())
+    val values = Common.readInput("/day01/input.txt").map(String::toInt)
+    println(SonarSweep1().countIncreases(values))
 }
 
 class SonarSweep1 {
 
-    fun countIncreases(): Int {
-        val values = readValues()
-
+    fun countIncreases(values: List<Int>): Int {
         var increases = 0
 
         for (i in 1 until values.size) {
@@ -20,11 +19,5 @@ class SonarSweep1 {
         }
 
         return increases
-    }
-
-    private fun readValues(): List<Int> {
-        return File(this::class.java.getResource("input.txt").path)
-            .readLines()
-            .map { line -> Integer.valueOf(line) }
     }
 }
