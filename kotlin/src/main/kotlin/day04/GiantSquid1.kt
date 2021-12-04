@@ -55,7 +55,9 @@ class GiantSquid1 {
         private val rows: List<List<Cell>>
 
         init {
-            rows = numbers.map { row -> row.map { number -> Cell(number, false) } }
+            rows = numbers.map { row ->
+                row.map { number -> Cell(number, false) }
+            }
         }
 
         fun check(number: Int) {
@@ -78,7 +80,10 @@ class GiantSquid1 {
         }
 
         fun sumAllUnmarkedNumbers(): Int {
-            return rows.sumOf { row -> row.filter { cell -> !cell.checked }.sumOf { cell -> cell.number } }
+            return rows.sumOf { row ->
+                row.filter { cell -> !cell.checked }
+                    .sumOf { cell -> cell.number }
+            }
         }
 
         private fun isWinningRow(index: Int): Boolean {
@@ -86,7 +91,8 @@ class GiantSquid1 {
         }
 
         private fun isWinningColumn(index: Int): Boolean {
-            return rows.map { row -> row[index] }.all { cell -> cell.checked }
+            return rows.map { row -> row[index] }
+                .all { cell -> cell.checked }
         }
     }
 
