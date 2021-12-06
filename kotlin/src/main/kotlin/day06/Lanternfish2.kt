@@ -15,13 +15,7 @@ class Lanternfish2 {
 
         val cache = HashMap<FishAndRemainingRounds, Long>()
 
-        var count = 0L
-
-        for (fish in fishList) {
-            count += simulateFish(fish, 256, cache)
-        }
-
-        return count
+        return fishList.sumOf { simulateFish(it, 256, cache) }
     }
 
     private fun simulateFish(fish: Int, remainingRounds: Int, cache: HashMap<FishAndRemainingRounds, Long>): Long {
