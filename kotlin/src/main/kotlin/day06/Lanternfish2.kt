@@ -11,10 +11,8 @@ fun main() {
 class Lanternfish2 {
 
     fun go(input: List<String>): Long {
-        val fishList = ArrayList(input.first().split(',').map(String::toInt))
-
+        val fishList = input.first().split(',').map(String::toInt)
         val cache = HashMap<FishAndRemainingRounds, Long>()
-
         return fishList.sumOf { simulateFish(it, 256, cache) }
     }
 
@@ -28,15 +26,13 @@ class Lanternfish2 {
             return maybeCount
         }
 
-        return if (fish > 0) {
-            val count = simulateFish(fish - 1, remainingRounds - 1, cache)
-            cache[FishAndRemainingRounds(fish, remainingRounds)] = count
-            count
+        val count = if (fish > 0) {
+            simulateFish(fish - 1, remainingRounds - 1, cache)
         } else {
-            val count = simulateFish(6, remainingRounds - 1, cache) + simulateFish(8, remainingRounds - 1, cache)
-            cache[FishAndRemainingRounds(fish, remainingRounds)] = count
-            count
+            simulateFish(6, remainingRounds - 1, cache) + simulateFish(8, remainingRounds - 1, cache)
         }
+        cache[FishAndRemainingRounds(fish, remainingRounds)] = count
+        return count
     }
 
     data class FishAndRemainingRounds(val fish: Int, val remainingRounds: Int)
