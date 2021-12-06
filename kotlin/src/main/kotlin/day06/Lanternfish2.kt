@@ -39,11 +39,9 @@ class Lanternfish2 {
             cache[FishAndRemainingRounds(fish, remainingRounds)] = count
             count
         } else {
-            val count1 = simulateFish(6, remainingRounds - 1, cache)
-            cache[FishAndRemainingRounds(6, remainingRounds -1)] = count1
-            val count2 = simulateFish(8, remainingRounds - 1, cache)
-            cache[FishAndRemainingRounds(8, remainingRounds - 1)] = count2
-            count1 + count2
+            val count = simulateFish(6, remainingRounds - 1, cache) + simulateFish(8, remainingRounds - 1, cache)
+            cache[FishAndRemainingRounds(fish, remainingRounds)] = count
+            count
         }
     }
 
