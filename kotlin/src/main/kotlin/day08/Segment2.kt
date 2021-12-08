@@ -33,28 +33,28 @@ class Segment2 {
     }
 
     fun decode(patterns: List<String>, resultDigits: List<String>): Int {
-        val patternOne = patterns.first { pattern -> pattern.length == 2 }
-        val patternSeven = patterns.first { pattern -> pattern.length == 3 }
-        val patternFour = patterns.first { pattern -> pattern.length == 4 }
+        val patternOne = patterns.first { it.length == 2 }
+        val patternSeven = patterns.first { it.length == 3 }
+        val patternFour = patterns.first { it.length == 4 }
 
-        val segmentOccurences = patterns.flatMap { pattern -> pattern.toCharArray().toList() }
-            .groupBy { char -> char }
-            .mapValues { entry -> entry.value.size }
+        val segmentOccurences = patterns.flatMap { it.toCharArray().toList() }
+            .groupBy { it }
+            .mapValues { it.value.size }
 
         // f = 9 occurences
-        val f = segmentOccurences.filter { entry -> entry.value == 9 }.map { entry -> entry.key }.first()
+        val f = segmentOccurences.filter { it.value == 9 }.map { it.key }.first()
         // b = 6 occurences
-        val b = segmentOccurences.filter { entry -> entry.value == 6 }.map { entry -> entry.key }.first()
+        val b = segmentOccurences.filter { it.value == 6 }.map { it.key }.first()
         // e = 4 occurences
-        val e = segmentOccurences.filter { entry -> entry.value == 4 }.map { entry -> entry.key }.first()
+        val e = segmentOccurences.filter { it.value == 4 }.map { it.key }.first()
         // a = 7 - 1
-        val a = patternSeven.toCharArray().first { char -> !patternOne.contains(char) }
+        val a = patternSeven.toCharArray().first { !patternOne.contains(it) }
         // c = 8 occurences from remaining segments
-        val c = segmentOccurences.filter { entry -> !setOf(f, b, e, a).contains(entry.key) && entry.value == 8 }.map { entry -> entry.key }.first()
+        val c = segmentOccurences.filter { !setOf(f, b, e, a).contains(it.key) && it.value == 8 }.map { it.key }.first()
         // d = 4 - (b c f)
-        val d = patternFour.toCharArray().first { char -> !setOf(b, c, f).contains(char) }
+        val d = patternFour.toCharArray().first { !setOf(b, c, f).contains(it) }
         // g = Last segment
-        val g = segmentOccurences.filter { entry -> !setOf(f, b, e, a, c, d).contains(entry.key) }.map { entry -> entry.key }.first()
+        val g = segmentOccurences.filter { !setOf(f, b, e, a, c, d).contains(it.key) }.map { it.key }.first()
 
         val segmentMapping = HashMap<Char, Char>()
         segmentMapping[a] = 'a'
@@ -65,9 +65,9 @@ class Segment2 {
         segmentMapping[f] = 'f'
         segmentMapping[g] = 'g'
 
-        return resultDigits.map { pattern -> pattern.toCharArray().map { char -> segmentMapping[char] }.toSet() }
-            .map { pattern -> digits.indexOf(pattern) }
-            .joinToString("") { digit -> digit.toString() }
+        return resultDigits.map { pattern -> pattern.toCharArray().map { segmentMapping[it] }.toSet() }
+            .map(digits::indexOf)
+            .joinToString("", transform = Int::toString)
             .toInt()
     }
 }
