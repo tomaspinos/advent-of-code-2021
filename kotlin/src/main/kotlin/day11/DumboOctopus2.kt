@@ -30,8 +30,6 @@ class DumboOctopus2 {
 
     class EnergyLevelMap(val map: Array<IntArray>) {
 
-        var flashCount = 0
-
         fun step() {
             for (x in map.indices) {
                 for (y in map[x].indices) {
@@ -49,17 +47,10 @@ class DumboOctopus2 {
         }
 
         fun allFlashed(): Boolean {
-            var sum = 0
-            for (x in map.indices) {
-                for (y in map[x].indices) {
-                    sum += map[x][y]
-                }
-            }
-            return sum == 0
+            return 0 == map.sumOf { column -> column.sumOf { level -> level } }
         }
 
         private fun flash(x: Int, y: Int) {
-            flashCount++
             map[x][y] = 0
             for (xx in max(x - 1, 0)..min(x + 1, map.size - 1)) {
                 for (yy in max(y - 1, 0)..min(y + 1, map[x].size - 1)) {
