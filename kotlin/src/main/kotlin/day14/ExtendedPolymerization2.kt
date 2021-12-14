@@ -64,11 +64,7 @@ class ExtendedPolymerization2 {
     data class Template(val template: String) {
 
         fun pairs(): List<String> {
-            val pairs = ArrayList<String>()
-            for (i in 0..template.length - 2) {
-                pairs.add(template.substring(i, i + 2))
-            }
-            return pairs
+            return template.windowed(2, 1)
         }
 
         fun stats(): CharacterStats {
