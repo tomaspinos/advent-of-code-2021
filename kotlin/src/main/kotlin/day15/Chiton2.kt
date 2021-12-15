@@ -5,10 +5,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
-    println(Chiton1().lowestTotalRiskPath(Common.readInput("/day15/input.txt")))
+    println(Chiton2().lowestTotalRiskPath(Common.readInput("/day15/input.txt")))
 }
 
-class Chiton1 {
+class Chiton2 {
 
     fun lowestTotalRiskPath(input: List<String>): Int {
         val caveMap = readInput(input)
@@ -30,11 +30,43 @@ class Chiton1 {
         return caveMap.getCost(end)
     }
 
-    private fun readInput(input: List<String>): CaveMap {
-        val map =
-            input.map { line -> line.toCharArray().map { char -> Integer.parseInt(char.toString()) }.toIntArray() }
-                .toTypedArray()
-        return CaveMap(map)
+    fun readInput(input: List<String>): CaveMap {
+        val map = input.map { line -> line.toCharArray().map { char -> Integer.parseInt(char.toString()) } }
+
+        val newMap = ArrayList<List<Int>>()
+
+        for (x in map.indices) {
+            val column = map[x]
+            val newColumn = ArrayList<Int>()
+            for (i in 0 until 5) {
+                val transformedColumn = column.map { n ->
+                    if (n + i <= 9) {
+                        n + i
+                    } else {
+                        ((n + i) % 10) + 1
+                    }
+                }
+                newColumn.addAll(transformedColumn)
+            }
+            newMap.add(newColumn)
+        }
+
+        for (i in 1 until 5) {
+            for (x in map.indices) {
+                val column = newMap[x]
+                val transformedColumn = column.map { n ->
+                    if (n + i <= 9) {
+                        n + i
+                    } else {
+                        ((n + i) % 10) + 1
+                    }
+                }
+                newMap.add(transformedColumn)
+            }
+        }
+
+        val newMapAsArray = newMap.map { column -> column.toIntArray() }.toTypedArray()
+        return CaveMap(newMapAsArray)
     }
 
     data class Coordinates(val x: Int, val y: Int)
@@ -47,7 +79,7 @@ class Chiton1 {
 
         val mapHeight: Int = map[0].size
 
-        val costMap: Array<IntArray> = Array(mapWidth) { IntArray(mapHeight) { Integer.MAX_VALUE } }
+        private val costMap: Array<IntArray> = Array(mapWidth) { IntArray(mapHeight) { Integer.MAX_VALUE } }
 
         fun getOriginalCost(cell: Coordinates): Int {
             return map[cell.x][cell.y]
