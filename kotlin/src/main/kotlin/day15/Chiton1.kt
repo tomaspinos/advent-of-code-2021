@@ -1,9 +1,13 @@
 package day15
 
 import Common
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * 390
+ */
 fun main() {
     println(Chiton1().lowestTotalRiskPath(Common.readInput("/day15/input.txt")))
 }
@@ -16,15 +20,20 @@ class Chiton1 {
         val start = Coordinates(0, 0)
         val end = Coordinates(caveMap.mapWidth - 1, caveMap.mapHeight - 1)
 
-        caveMap.setCost(start, 0)
+        val cellQueue = PriorityQueue<Coordinates> { cell1, cell2 -> caveMap.getCost(cell1) - caveMap.getCost(cell2) }
 
-        var currentCells = listOf(start)
-        while (caveMap.getCost(end) == Integer.MAX_VALUE) {
-            val cheapestLinks = caveMap.getCheapestLinksFrom(currentCells)
-            cheapestLinks.forEach { cheapestLink ->
-                caveMap.setCost(cheapestLink.to, caveMap.getCost(cheapestLink.from) + caveMap.getOriginalCost(cheapestLink.to))
+        caveMap.setCost(start, 0)
+        cellQueue.add(start)
+
+        while (cellQueue.isNotEmpty()) {
+            val currentCell = cellQueue.remove()
+            caveMap.getNeighboringCells(currentCell).forEach { neighboringCell ->
+                val cost = caveMap.getCost(currentCell) + caveMap.getOriginalCost(neighboringCell)
+                if (cost < caveMap.getCost(neighboringCell)) {
+                    caveMap.setCost(neighboringCell, cost)
+                    cellQueue.add(neighboringCell)
+                }
             }
-            currentCells = cheapestLinks.map { link -> link.to }
         }
 
         return caveMap.getCost(end)
@@ -39,15 +48,13 @@ class Chiton1 {
 
     data class Coordinates(val x: Int, val y: Int)
 
-    data class Link(val from: Coordinates, val to: Coordinates, val cost: Int)
-
     class CaveMap(val map: Array<IntArray>) {
 
         val mapWidth: Int = map.size
 
         val mapHeight: Int = map[0].size
 
-        val costMap: Array<IntArray> = Array(mapWidth) { IntArray(mapHeight) { Integer.MAX_VALUE } }
+        private val costMap: Array<IntArray> = Array(mapWidth) { IntArray(mapHeight) { Integer.MAX_VALUE } }
 
         fun getOriginalCost(cell: Coordinates): Int {
             return map[cell.x][cell.y]
@@ -61,29 +68,13 @@ class Chiton1 {
             costMap[cell.x][cell.y] = cost
         }
 
-        fun getCheapestLinksFrom(cells: List<Coordinates>): List<Link> {
-            return cells
-                .flatMap { cell ->
-                    getNeighboringCells(cell)
-                        .map { neighboringCell -> Link(cell, neighboringCell, getOriginalCost(neighboringCell)) }
-                }
-                .groupBy { link -> link.to }
-                .mapValues { entry ->
-                    val linksToTheSameCell = entry.value
-                    linksToTheSameCell.minByOrNull { link -> getCost(link.from) }!!
-                }
-                .values
-                .toList()
-        }
-
-        private fun getNeighboringCells(cell: Coordinates): List<Coordinates> {
+        fun getNeighboringCells(cell: Coordinates): List<Coordinates> {
             return listOf(
                 Coordinates(cell.x, max(cell.y - 1, 0)),
                 Coordinates(max(cell.x - 1, 0), cell.y),
                 Coordinates(min(cell.x + 1, mapWidth - 1), cell.y),
                 Coordinates(cell.x, min(cell.y + 1, mapHeight - 1))
             ).distinct()
-                .filter { neighboringCell -> getCost(neighboringCell) == Integer.MAX_VALUE }
         }
     }
 }
