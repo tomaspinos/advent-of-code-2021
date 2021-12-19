@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 
 internal class Snailfish2Test {
 
-    val snailfish = Snailfish2()
+    private val snailfish = Snailfish2()
 
     @Test
     fun magnitude() {
