@@ -12,30 +12,13 @@ class ReactorReboot2 {
     fun go(input: List<String>): Long {
         val cuboids = readInput(input).iterator()
 
-        var cuboid: Cuboid? = null
-
-        while (cuboids.hasNext()) {
-            cuboid = cuboids.next()
-            if (cuboid.on) {
-                break
-            }
-        }
-
-        if (cuboid == null) {
-            throw IllegalStateException("No on step")
-        }
-
         val processedCuboids = ArrayList<Cuboid>()
-        processedCuboids.add(cuboid)
 
         while (cuboids.hasNext()) {
-            cuboid = cuboids.next()
+            val cuboid = cuboids.next()
 
             for (processedCuboid in ArrayList(processedCuboids)) {
-                val intersection = cuboid.intersection(processedCuboid, !processedCuboid.on)
-                if (intersection.isValid()) {
-                    processedCuboids.add(intersection)
-                }
+                cuboid.intersection(processedCuboid, !processedCuboid.on)?.also { processedCuboids.add(it) }
             }
 
             if (cuboid.on) {
@@ -43,7 +26,7 @@ class ReactorReboot2 {
             }
         }
 
-        return processedCuboids.map { c -> if (c.on) c.dimension() else -c.dimension() }.sum()
+        return processedCuboids.sumOf { cuboid -> if (cuboid.on) cuboid.dimension() else -cuboid.dimension() }
     }
 
     fun readInput(input: List<String>): List<Cuboid> {
@@ -72,17 +55,14 @@ class ReactorReboot2 {
             return (xRange.last - xRange.first + 1) * (yRange.last - yRange.first + 1) * (zRange.last - zRange.first + 1)
         }
 
-        fun intersection(other: Cuboid, intersectionOn: Boolean): Cuboid {
-            return Cuboid(
+        fun intersection(other: Cuboid, intersectionOn: Boolean): Cuboid? {
+            val intersection = Cuboid(
                 intersectionOn,
                 intersection(xRange, other.xRange),
                 intersection(yRange, other.yRange),
                 intersection(zRange, other.zRange)
             )
-        }
-
-        fun isValid(): Boolean {
-            return xRange.last >= xRange.first && yRange.last >= yRange.first && zRange.last >= zRange.first
+            return if (intersection.isValid()) intersection else null
         }
 
         private fun intersection(r1: LongRange, r2: LongRange): LongRange {
@@ -104,6 +84,10 @@ class ReactorReboot2 {
                 val max = min(a.last, b.last)
                 LongRange(min, max)
             }
+        }
+
+        private fun isValid(): Boolean {
+            return xRange.last >= xRange.first && yRange.last >= yRange.first && zRange.last >= zRange.first
         }
     }
 }
