@@ -10,7 +10,6 @@ internal class Amphipod1Test {
 
     /**
      * #############
-     * #01234567890#
      * ###B#C#B#D###
      *   #A#D#C#A#
      *   #########
@@ -19,19 +18,18 @@ internal class Amphipod1Test {
      */
     @Test
     fun go() {
-        val amphipods = LinkedHashSet(listOf(
-            Amphipod(0, AmphipodType.A, logic.cells[12]),
-            Amphipod(1, AmphipodType.A, logic.cells[18]),
-            Amphipod(2, AmphipodType.B, logic.cells[11]),
-            Amphipod(3, AmphipodType.B, logic.cells[15]),
-            Amphipod(4, AmphipodType.C, logic.cells[13]),
-            Amphipod(5, AmphipodType.C, logic.cells[16]),
-            Amphipod(6, AmphipodType.D, logic.cells[14]),
-            Amphipod(7, AmphipodType.D, logic.cells[17])
-        ))
-        val situation = Situation(logic.cells, logic.moves, amphipods, 0)
-        val resultCache = HashMap<Set<Amphipod>, Int>()
-        val result = logic.move(situation, HashSet(), resultCache, 0)
+        val amphipods = setOf(
+            Amphipod(0, AmphipodType.A, 12),
+            Amphipod(1, AmphipodType.A, 18),
+            Amphipod(2, AmphipodType.B, 11),
+            Amphipod(3, AmphipodType.B, 15),
+            Amphipod(4, AmphipodType.C, 13),
+            Amphipod(5, AmphipodType.C, 16),
+            Amphipod(6, AmphipodType.D, 14),
+            Amphipod(7, AmphipodType.D, 17)
+        )
+        val situation = Situation(amphipods)
+        val result = logic.move(situation)
         assertEquals(12521, result)
     }
 }
