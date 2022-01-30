@@ -2,6 +2,7 @@ package day23
 
 import day23.Amphipod1.Amphipod
 import day23.Amphipod1.AmphipodType.*
+import day23.Amphipod1.Cell.*
 import day23.Amphipod1.Situation
 import java.util.*
 
@@ -17,14 +18,14 @@ import java.util.*
 fun main() {
     val logic = Amphipod1()
     val amphipods = setOf(
-        Amphipod(0, A, 11),
-        Amphipod(1, A, 14),
-        Amphipod(2, B, 12),
-        Amphipod(3, B, 15),
-        Amphipod(4, C, 13),
-        Amphipod(5, C, 18),
-        Amphipod(6, D, 16),
-        Amphipod(7, D, 17)
+        Amphipod(0, A, A1),
+        Amphipod(1, A, B2),
+        Amphipod(2, B, A2),
+        Amphipod(3, B, C1),
+        Amphipod(4, C, B1),
+        Amphipod(5, C, D2),
+        Amphipod(6, D, C2),
+        Amphipod(7, D, D1)
     )
     val situation = Situation(amphipods)
     val result = logic.move(situation)
@@ -33,9 +34,73 @@ fun main() {
 
 class Amphipod1 {
 
+    enum class AmphipodType(val moveEnergy: Int) {
+
+        A(1),
+        B(10),
+        C(100),
+        D(1000)
+    }
+
+    enum class Cell(val homeOf: AmphipodType? = null) {
+
+        H0, H1, H2, H3, H4, H5, H6, H7, H8, H9, H10,
+        A1(A), A2(A),
+        B1(B), B2(B),
+        C1(C), C2(C),
+        D1(D), D2(D)
+    }
+
     companion object {
 
-        val allAmphipodTypes = values().toSet()
+        val allAmphipodTypes = AmphipodType.values().toSet()
+
+        val homesA = listOf(A1, A2)
+        val homesB = listOf(B1, B2)
+        val homesC = listOf(C1, C2)
+        val homesD = listOf(D1, D2)
+
+        private fun possibleMoves(amphipodType: AmphipodType, hall: List<Cell>, home: List<Cell>): List<PossibleMove> {
+            val result = ArrayList<PossibleMove>()
+            val homeSteps = ArrayList<Cell>()
+            for (homeCell in home) {
+                homeSteps.add(homeCell)
+                val steps = ArrayList<Cell>()
+                steps.addAll(hall)
+                steps.addAll(homeSteps)
+                result.add(PossibleMove(steps, setOf(amphipodType)))
+            }
+            return result
+        }
+
+        private fun flatten(vararg lists: List<PossibleMove>): List<PossibleMove> {
+            return lists.flatMap { list -> list }
+        }
+
+        class PossibleMoveBuilder(private val amphipodTypes: Set<AmphipodType>) {
+
+            private val steps: MutableList<List<Cell>> = ArrayList()
+
+            fun steps(vararg cells: Cell): PossibleMoveBuilder {
+                steps.add(cells.toList())
+                return this
+            }
+
+            fun build(): List<PossibleMove> {
+                val result = ArrayList<PossibleMove>()
+                val partialSteps = ArrayList<Cell>()
+                for (stepSegment in steps) {
+                    partialSteps.addAll(stepSegment)
+                    val steps = partialSteps.toList()
+                    result.add(PossibleMove(steps, amphipodTypes))
+                }
+                return result
+            }
+        }
+
+        private fun possibleMoveBuilder(amphipodTypes: Set<AmphipodType>): PossibleMoveBuilder {
+            return PossibleMoveBuilder(amphipodTypes)
+        }
 
         /**
          * #############
@@ -45,213 +110,118 @@ class Amphipod1 {
          *   #########
          */
         val moves = mapOf(
-            Pair(0, emptyList()),
+            Pair(H0, emptyList()),
             Pair(
-                1,
-                listOf(
-                    PossibleMove(listOf(2, 11), setOf(A)),
-                    PossibleMove(listOf(2, 11, 12), setOf(A)),
-                    PossibleMove(listOf(2, 3, 4, 13), setOf(B)),
-                    PossibleMove(listOf(2, 3, 4, 13, 14), setOf(B)),
-                    PossibleMove(listOf(2, 3, 4, 5, 6, 15), setOf(C)),
-                    PossibleMove(listOf(2, 3, 4, 5, 6, 15, 16), setOf(C)),
-                    PossibleMove(listOf(2, 3, 4, 5, 6, 7, 8, 17), setOf(D)),
-                    PossibleMove(listOf(2, 3, 4, 5, 6, 7, 8, 17, 18), setOf(D))
+                H1,
+                flatten(
+                    possibleMoves(A, listOf(H2), homesA),
+                    possibleMoves(B, listOf(H2, H3, H4), homesB),
+                    possibleMoves(C, listOf(H2, H3, H4, H5, H6), homesC),
+                    possibleMoves(D, listOf(H2, H3, H4, H5, H6, H7, H8), homesD)
                 )
             ),
             Pair(
-                3,
-                listOf(
-                    PossibleMove(listOf(2, 11), setOf(A)),
-                    PossibleMove(listOf(2, 11, 12), setOf(A)),
-                    PossibleMove(listOf(4, 13), setOf(B)),
-                    PossibleMove(listOf(4, 13, 14), setOf(B)),
-                    PossibleMove(listOf(4, 5, 6, 15), setOf(C)),
-                    PossibleMove(listOf(4, 5, 6, 15, 16), setOf(C)),
-                    PossibleMove(listOf(4, 5, 6, 7, 8, 17), setOf(D)),
-                    PossibleMove(listOf(4, 5, 6, 7, 8, 17, 18), setOf(D))
+                H3,
+                flatten(
+                    possibleMoves(A, listOf(H2), homesA),
+                    possibleMoves(B, listOf(H4), homesB),
+                    possibleMoves(C, listOf(H4, H5, H6), homesC),
+                    possibleMoves(D, listOf(H4, H5, H6, H7, H8), homesD)
                 )
             ),
             Pair(
-                5,
-                listOf(
-                    PossibleMove(listOf(4, 13), setOf(B)),
-                    PossibleMove(listOf(4, 13, 14), setOf(B)),
-                    PossibleMove(listOf(4, 3, 2, 11), setOf(A)),
-                    PossibleMove(listOf(4, 3, 2, 11, 12), setOf(A)),
-                    PossibleMove(listOf(6, 15), setOf(C)),
-                    PossibleMove(listOf(6, 15, 16), setOf(C)),
-                    PossibleMove(listOf(6, 7, 8, 17), setOf(D)),
-                    PossibleMove(listOf(6, 7, 8, 17, 18), setOf(D))
+                H5,
+                flatten(
+                    possibleMoves(B, listOf(H4), homesB),
+                    possibleMoves(A, listOf(H4, H3, H2), homesA),
+                    possibleMoves(C, listOf(H6), homesC),
+                    possibleMoves(D, listOf(H6, H7, H8), homesD)
                 )
             ),
             Pair(
-                7,
-                listOf(
-                    PossibleMove(listOf(6, 15), setOf(C)),
-                    PossibleMove(listOf(6, 15, 16), setOf(C)),
-                    PossibleMove(listOf(6, 5, 4, 13), setOf(B)),
-                    PossibleMove(listOf(6, 5, 4, 13, 14), setOf(B)),
-                    PossibleMove(listOf(6, 5, 4, 3, 2, 11), setOf(A)),
-                    PossibleMove(listOf(6, 5, 4, 3, 2, 11, 12), setOf(A)),
-                    PossibleMove(listOf(8, 17), setOf(D)),
-                    PossibleMove(listOf(8, 17, 18), setOf(D))
+                H7,
+                flatten(
+                    possibleMoves(C, listOf(H6), homesC),
+                    possibleMoves(B, listOf(H6, H5, H4), homesB),
+                    possibleMoves(A, listOf(H6, H5, H4, H3, H2), homesA),
+                    possibleMoves(D, listOf(H8), homesD)
                 )
             ),
             Pair(
-                9,
-                listOf(
-                    PossibleMove(listOf(8, 17), setOf(D)),
-                    PossibleMove(listOf(8, 17, 18), setOf(D)),
-                    PossibleMove(listOf(8, 7, 6, 15), setOf(C)),
-                    PossibleMove(listOf(8, 7, 6, 15, 16), setOf(C)),
-                    PossibleMove(listOf(8, 7, 6, 5, 4, 13), setOf(B)),
-                    PossibleMove(listOf(8, 7, 6, 5, 4, 13, 15), setOf(B)),
-                    PossibleMove(listOf(8, 7, 6, 5, 4, 3, 2, 11), setOf(A)),
-                    PossibleMove(listOf(8, 7, 6, 5, 4, 3, 2, 11, 12), setOf(A))
+                H9,
+                flatten(
+                    possibleMoves(D, listOf(H8), homesD),
+                    possibleMoves(C, listOf(H8, H7, H6), homesC),
+                    possibleMoves(B, listOf(H8, H7, H6, H5, H4), homesB),
+                    possibleMoves(A, listOf(H8, H7, H6, H5, H4, H3, H2), homesA)
                 )
             ),
-            Pair(10, emptyList()),
+            Pair(H10, emptyList()),
             Pair(
-                11,
-                listOf(
-                    PossibleMove(listOf(12), setOf(A)),
-                    PossibleMove(listOf(2, 1), allAmphipodTypes),
-                    PossibleMove(listOf(2, 3), allAmphipodTypes),
-                    PossibleMove(listOf(2, 3, 4, 5), allAmphipodTypes),
-                    PossibleMove(listOf(2, 3, 4, 5, 6, 7), allAmphipodTypes),
-                    PossibleMove(listOf(2, 3, 4, 5, 6, 7, 8, 9), allAmphipodTypes)
+                A1,
+                flatten(
+                    possibleMoveBuilder(setOf(A)).steps(A2).build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H2, H1).build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H2, H3).steps(H4, H5).steps(H6, H7).steps(H8, H9)
+                        .build()
                 )
             ),
             Pair(
-                12,
-                listOf(
-                    PossibleMove(listOf(11, 2, 1), setOf(B, C, D)),
-                    PossibleMove(listOf(11, 2, 3), setOf(B, C, D)),
-                    PossibleMove(listOf(11, 2, 3, 4, 5), setOf(B, C, D)),
-                    PossibleMove(listOf(11, 2, 3, 4, 5, 6, 7), setOf(B, C, D)),
-                    PossibleMove(listOf(11, 2, 3, 4, 5, 6, 7, 8, 9), setOf(B, C, D))
+                A2,
+                flatten(
+                    possibleMoveBuilder(setOf(B, C, D)).steps(A1, H2, H1).build(),
+                    possibleMoveBuilder(setOf(B, C, D)).steps(A1, H2, H3).steps(H4, H5).steps(H6, H7).steps(H8, H9)
+                        .build()
                 )
             ),
             Pair(
-                13,
-                listOf(
-                    PossibleMove(listOf(14), setOf(B)),
-                    PossibleMove(listOf(4, 3), allAmphipodTypes),
-                    PossibleMove(listOf(4, 3, 2, 1), allAmphipodTypes),
-                    PossibleMove(listOf(4, 5), allAmphipodTypes),
-                    PossibleMove(listOf(4, 5, 6, 7), allAmphipodTypes),
-                    PossibleMove(listOf(4, 5, 6, 7, 8, 9), allAmphipodTypes)
-                )
-            ),
-            Pair(14,
-                listOf(
-                    PossibleMove(listOf(13, 4, 3), setOf(A, C, D)),
-                    PossibleMove(listOf(13, 4, 3, 2, 1), setOf(A, C, D)),
-                    PossibleMove(listOf(13, 4, 5), setOf(A, C, D)),
-                    PossibleMove(listOf(13, 4, 5, 6, 7), setOf(A, C, D)),
-                    PossibleMove(listOf(13, 4, 5, 6, 7, 8, 9), setOf(A, C, D))
+                B1,
+                flatten(
+                    possibleMoveBuilder(setOf(B)).steps(B2).build(),
+                    possibleMoveBuilder(setOf(B, C, D)).steps(H4, H3).steps(H2, H1).build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H4, H5).steps(H6, H7).steps(H8, H9).build()
                 )
             ),
             Pair(
-                15,
-                listOf(
-                    PossibleMove(listOf(16), setOf(C)),
-                    PossibleMove(listOf(6, 5), allAmphipodTypes),
-                    PossibleMove(listOf(6, 5, 4, 3), allAmphipodTypes),
-                    PossibleMove(listOf(6, 5, 4, 3, 2, 1), allAmphipodTypes),
-                    PossibleMove(listOf(6, 7), allAmphipodTypes),
-                    PossibleMove(listOf(6, 7, 8, 9), allAmphipodTypes)
-                )
-            ),
-            Pair(16,
-                listOf(
-                    PossibleMove(listOf(15, 6, 5), setOf(A, B, D)),
-                    PossibleMove(listOf(15, 6, 5, 4, 3), setOf(A, B, D)),
-                    PossibleMove(listOf(15, 6, 5, 4, 3, 2, 1), setOf(A, B, D)),
-                    PossibleMove(listOf(15, 6, 7), setOf(A, B, D)),
-                    PossibleMove(listOf(15, 6, 7, 8, 9), setOf(A, B, D))
+                B2,
+                flatten(
+                    possibleMoveBuilder(setOf(A, C, D)).steps(B1, H4, H3).steps(H2, H1).build(),
+                    possibleMoveBuilder(setOf(A, C, D)).steps(B1, H4, H5).steps(H6, H7).steps(H8, H9).build()
                 )
             ),
             Pair(
-                17,
-                listOf(
-                    PossibleMove(listOf(18), setOf(D)),
-                    PossibleMove(listOf(8, 7), allAmphipodTypes),
-                    PossibleMove(listOf(8, 7, 6, 5), allAmphipodTypes),
-                    PossibleMove(listOf(8, 7, 6, 5, 4, 3), allAmphipodTypes),
-                    PossibleMove(listOf(8, 7, 6, 5, 4, 3, 2, 1), allAmphipodTypes),
-                    PossibleMove(listOf(8, 9), allAmphipodTypes)
+                C1,
+                flatten(
+                    possibleMoveBuilder(setOf(C)).steps(C2).build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H6, H5).steps(H4, H3).steps(H2, H1).build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H6, H7).steps(H8, H9).build()
                 )
             ),
-            Pair(18,
-                listOf(
-                    PossibleMove(listOf(17, 8, 7), setOf(A, B, C)),
-                    PossibleMove(listOf(17, 8, 7, 6, 5), setOf(A, B, C)),
-                    PossibleMove(listOf(17, 8, 7, 6, 5, 4, 3), setOf(A, B, C)),
-                    PossibleMove(listOf(17, 8, 7, 6, 5, 4, 3, 2, 1), setOf(A, B, C)),
-                    PossibleMove(listOf(17, 8, 9), setOf(A, B, C))
+            Pair(
+                C2,
+                flatten(
+                    possibleMoveBuilder(setOf(A, B, D)).steps(C1, H6, H5).steps(H4, H3).steps(H2, H1).build(),
+                    possibleMoveBuilder(setOf(A, B, D)).steps(C1, H6, H7).steps(H8, H9).build()
+                )
+            ),
+            Pair(
+                D1,
+                flatten(
+                    possibleMoveBuilder(setOf(D)).steps(D2).build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H8, H7).steps(H6, H5).steps(H4, H3).steps(H2, H1)
+                        .build(),
+                    possibleMoveBuilder(allAmphipodTypes).steps(H8, H9).build()
+                )
+            ),
+            Pair(
+                D2,
+                flatten(
+                    possibleMoveBuilder(setOf(A, B, C)).steps(D1, H8, H7).steps(H6, H5).steps(H4, H3).steps(H2, H1)
+                        .build(),
+                    possibleMoveBuilder(setOf(A, B, C)).steps(D1, H8, H9).build()
                 )
             )
         )
-
-        val cells = createCells()
-
-        /**
-         * #############
-         * #01234567890#
-         * ###1#3#5#7###
-         *   #2#4#6#8#
-         *   #########
-         */
-        fun createCells(): List<Cell> {
-            val cells = listOf(
-                Cell(0, CellType.HALL_OPEN),
-                Cell(1, CellType.HALL_OPEN),
-                Cell(2, CellType.HALL_ABOVE_ROOM),
-                Cell(3, CellType.HALL_OPEN),
-                Cell(4, CellType.HALL_ABOVE_ROOM),
-                Cell(5, CellType.HALL_OPEN),
-                Cell(6, CellType.HALL_ABOVE_ROOM),
-                Cell(7, CellType.HALL_OPEN),
-                Cell(8, CellType.HALL_ABOVE_ROOM),
-                Cell(9, CellType.HALL_OPEN),
-                Cell(10, CellType.HALL_OPEN),
-                Cell(11, CellType.ROOM_A),
-                Cell(12, CellType.ROOM_A),
-                Cell(13, CellType.ROOM_B),
-                Cell(14, CellType.ROOM_B),
-                Cell(15, CellType.ROOM_C),
-                Cell(16, CellType.ROOM_C),
-                Cell(17, CellType.ROOM_D),
-                Cell(18, CellType.ROOM_D)
-            )
-
-            for (i in 0..9) cells[i].neighbors[Direction.RIGHT] = cells[i + 1]
-            for (i in 1..10) cells[i].neighbors[Direction.LEFT] = cells[i - 1]
-
-            cells[2].neighbors[Direction.DOWN] = cells[11]
-            cells[11].neighbors[Direction.DOWN] = cells[12]
-            cells[11].neighbors[Direction.UP] = cells[2]
-            cells[12].neighbors[Direction.UP] = cells[11]
-
-            cells[4].neighbors[Direction.DOWN] = cells[13]
-            cells[13].neighbors[Direction.DOWN] = cells[14]
-            cells[13].neighbors[Direction.UP] = cells[4]
-            cells[14].neighbors[Direction.UP] = cells[13]
-
-            cells[6].neighbors[Direction.DOWN] = cells[15]
-            cells[15].neighbors[Direction.DOWN] = cells[16]
-            cells[15].neighbors[Direction.UP] = cells[6]
-            cells[16].neighbors[Direction.UP] = cells[15]
-
-            cells[8].neighbors[Direction.DOWN] = cells[17]
-            cells[17].neighbors[Direction.DOWN] = cells[18]
-            cells[17].neighbors[Direction.UP] = cells[8]
-            cells[18].neighbors[Direction.UP] = cells[17]
-
-            return cells
-        }
     }
 
     fun move(initialSituation: Situation): Int {
@@ -287,13 +257,13 @@ class Amphipod1 {
                 .map { amphipod -> Pair(amphipod.type, amphipod.cell) }
                 .toSet())
 
-        val occupiedCellIndexes = amphipods.map { amphipod -> amphipod.cell }.toSet()
+        val occupiedCells = amphipods.map { amphipod -> amphipod.cell }.toSet()
 
         val amphipodsByCell =
             amphipods.groupBy { amphipod -> amphipod.cell }.mapValues { (_, list) -> list.first() }
 
         fun isDone(): Boolean {
-            return amphipods.all { amphipod -> amphipod.type.roomCellType == cells[amphipod.cell].type }
+            return amphipods.all(this@Situation::isOnTarget)
         }
 
         fun getPossibleMoves(): List<Move> {
@@ -303,7 +273,7 @@ class Amphipod1 {
                     else moves[amphipod.cell]!!
                         .filter { move ->
                             move.permittedAmphipodTypes.contains(amphipod.type)
-                                    && move.steps.all { step -> !occupiedCellIndexes.contains(step) }
+                                    && move.steps.all { step -> !occupiedCells.contains(step) }
                         }
                         .map { move ->
                             Move(
@@ -315,49 +285,12 @@ class Amphipod1 {
                 }
         }
 
-        fun move(amphipod: Amphipod, cell: Int): Situation {
+        fun move(amphipod: Amphipod, cell: Cell): Situation {
             val movedAmphipod = amphipod.at(cell)
             val newAmphipods = LinkedHashSet(amphipods)
             newAmphipods.remove(amphipod)
             newAmphipods.add(movedAmphipod)
             return Situation(newAmphipods)
-        }
-
-        /**
-         * #############
-         * #01234567890#
-         * ###1#3#5#7###
-         *   #2#4#6#8#
-         *   #########
-         */
-        fun print() {
-            println("#############")
-
-            print("#")
-            for (i in (0..10)) printCell(i)
-            println("#")
-
-            print("###")
-            printCell(11)
-            print("#")
-            printCell(13)
-            print("#")
-            printCell(15)
-            print("#")
-            printCell(17)
-            println("###")
-
-            print("  #")
-            printCell(12)
-            print("#")
-            printCell(14)
-            print("#")
-            printCell(16)
-            print("#")
-            printCell(18)
-            println("#")
-
-            println("  #########")
         }
 
         override fun equals(other: Any?): Boolean {
@@ -370,54 +303,17 @@ class Amphipod1 {
 
         private fun isOnTarget(amphipod: Amphipod): Boolean {
             return when (amphipod.type) {
-                A -> amphipod.cell == 12 || (amphipod.cell == 11 && amphipodsByCell[12]?.type == A)
-                B -> amphipod.cell == 14 || (amphipod.cell == 13 && amphipodsByCell[14]?.type == B)
-                C -> amphipod.cell == 16 || (amphipod.cell == 15 && amphipodsByCell[16]?.type == C)
-                D -> amphipod.cell == 18 || (amphipod.cell == 17 && amphipodsByCell[18]?.type == D)
-            }
-        }
-
-        private fun printCell(index: Int) {
-            val amphipod = amphipodsByCell[index]
-            if (amphipod != null) {
-                print(amphipod.type)
-            } else {
-                print(".")
+                A -> amphipodsByCell[A1]?.type == A && amphipodsByCell[A2]?.type == A
+                B -> amphipodsByCell[B1]?.type == B && amphipodsByCell[B2]?.type == B
+                C -> amphipodsByCell[C1]?.type == C && amphipodsByCell[C2]?.type == C
+                D -> amphipodsByCell[D1]?.type == D && amphipodsByCell[D2]?.type == D
             }
         }
     }
 
-    data class Cell(
-        val index: Int,
-        val type: CellType,
-        val neighbors: MutableMap<Direction, Cell> = EnumMap(Direction::class.java)
-    ) {
-        override fun equals(other: Any?): Boolean {
-            return index == (other as Cell).index
-        }
+    data class Amphipod(val index: Int, val type: AmphipodType, val cell: Cell) {
 
-        override fun hashCode(): Int {
-            return index + 1
-        }
-
-        override fun toString(): String {
-            return "$index"
-        }
-    }
-
-    enum class CellType {
-
-        HALL_OPEN,
-        HALL_ABOVE_ROOM,
-        ROOM_A,
-        ROOM_B,
-        ROOM_C,
-        ROOM_D
-    }
-
-    data class Amphipod(val index: Int, val type: AmphipodType, val cell: Int) {
-
-        fun at(newCell: Int): Amphipod {
+        fun at(newCell: Cell): Amphipod {
             return Amphipod(index, type, newCell)
         }
 
@@ -426,22 +322,9 @@ class Amphipod1 {
         }
     }
 
-    enum class AmphipodType(val roomCellType: CellType, val moveEnergy: Int) {
+    data class Move(val amphipod: Amphipod, val cell: Cell, val energy: Int)
 
-        A(CellType.ROOM_A, 1),
-        B(CellType.ROOM_B, 10),
-        C(CellType.ROOM_C, 100),
-        D(CellType.ROOM_D, 1000)
-    }
+    data class PossibleMove(val steps: List<Cell>, val permittedAmphipodTypes: Set<AmphipodType>)
 
-    enum class Direction {
-
-        LEFT, UP, RIGHT, DOWN
-    }
-
-    data class Move(val amphipod: Amphipod, val cell: Int, val energy: Int)
-
-    data class PossibleMove(val steps: List<Int>, val permittedAmphipodTypes: Set<AmphipodType>)
-
-    data class SituationKey(val positions: Set<Pair<AmphipodType, Int>>)
+    data class SituationKey(val positions: Set<Pair<AmphipodType, Cell>>)
 }

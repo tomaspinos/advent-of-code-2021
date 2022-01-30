@@ -1,6 +1,7 @@
 package day23
 
 import day23.Amphipod1.*
+import day23.Amphipod1.Cell.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -19,14 +20,14 @@ internal class Amphipod1Test {
     @Test
     fun go() {
         val amphipods = setOf(
-            Amphipod(0, AmphipodType.A, 12),
-            Amphipod(1, AmphipodType.A, 18),
-            Amphipod(2, AmphipodType.B, 11),
-            Amphipod(3, AmphipodType.B, 15),
-            Amphipod(4, AmphipodType.C, 13),
-            Amphipod(5, AmphipodType.C, 16),
-            Amphipod(6, AmphipodType.D, 14),
-            Amphipod(7, AmphipodType.D, 17)
+            Amphipod(0, AmphipodType.A, A2),
+            Amphipod(1, AmphipodType.A, D2),
+            Amphipod(2, AmphipodType.B, A1),
+            Amphipod(3, AmphipodType.B, C1),
+            Amphipod(4, AmphipodType.C, B1),
+            Amphipod(5, AmphipodType.C, C2),
+            Amphipod(6, AmphipodType.D, B2),
+            Amphipod(7, AmphipodType.D, D1)
         )
         val situation = Situation(amphipods)
         val result = logic.move(situation)
